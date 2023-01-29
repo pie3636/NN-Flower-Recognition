@@ -1,1 +1,3 @@
 data/flowers
+.ipynb_checkpoints/*
+*.pt
