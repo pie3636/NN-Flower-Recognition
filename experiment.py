@@ -20,13 +20,15 @@ random_state = 42
 gen = random.Random(random_state)
 
 data_dir = 'data/flowers/'
-load_in_memory = False
+load_in_memory = True
 
-files = []
+folders = []
 for sub_folder in os.listdir(data_dir):
-    files.extend([sub_folder + '/' + file for file in os.listdir(data_dir + sub_folder)])
-gen.shuffle(files)
-# device = "cpu"
+    original_files = [sub_folder + '/' + file for file in os.listdir(data_dir + sub_folder)]
+    gen.shuffle(original_files)
+    folders.append(original_files)
+
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -41,18 +43,18 @@ idx2lbl = list(set(file.split('/')[0] for file in files))
 lbl2idx = {label: i for i, label in enumerate(idx2lbl)}
 
 class FlowerDataset(Dataset):
-    def __init__(self, files, data_dir, in_memory = False):
-        gen.shuffle(files)
+    def __init__(self, folders, data_dir, in_memory = False):
+        self.data_dir = data_dir
         self.in_memory = in_memory
-        self.files = files
+        self.files = [file for folder in folders for file in folder]
         self.data = []
         
         if in_memory:
-            for file in tqdm(files):
+            for file in tqdm(self.files):
                 self.data.append(self._read_file(file))
     
     def _read_file(self, file):
-        image = io.imread(data_dir + '/' + file)
+        image = io.imread(self.data_dir + '/' + file)
         #image = resize(image, (image.shape[0], max_w), anti_aliasing=False)
         label = file.split('/')[0]
         image = (image - image.min())/(image.max() - image.min()) # Normalization
@@ -65,15 +67,15 @@ class FlowerDataset(Dataset):
         if self.in_memory:
             return self.data[idx]
         else:
-            return self._read_file(files[idx])
+            return self._read_file(self.files[idx])
         
 
-l = len(files)
+l = len(folders)
 train_size = 0.9
 cutoff = int(l*train_size)
 
-train_set = FlowerDataset(files[:cutoff], data_dir, in_memory=load_in_memory)
-test_set = FlowerDataset(files[cutoff:], data_dir, in_memory=load_in_memory)
+train_set = FlowerDataset([folder[:cutoff] for folder in folders], data_dir, in_memory=load_in_memory)
+test_set = FlowerDataset([folder[cutoff:] for folder in folders], data_dir, in_memory=load_in_memory)
 
 class CNNClassifier(nn.Module):
     def __init__(self, num_classes=10):
@@ -184,10 +186,10 @@ print('Total number of parameters: ',
 torch.manual_seed(0)
 model.apply(init_weights)
 
-num_epochs = 12
+num_epochs = 20
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD
-learning_rate = 0.01
+learning_rate = 0.001
 batch_size = 1
 
 train_dataloader = DataLoader(train_set, shuffle=True, batch_size=batch_size)
