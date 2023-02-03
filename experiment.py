@@ -39,7 +39,7 @@ def init_weights(m):
         m.bias.data.fill_(0.01)
     return
 
-idx2lbl = list(set(file.split('/')[0] for file in files))
+idx2lbl = [file[0].split('/')[0] for file in folders]
 lbl2idx = {label: i for i, label in enumerate(idx2lbl)}
 
 class FlowerDataset(Dataset):
@@ -70,12 +70,20 @@ class FlowerDataset(Dataset):
             return self._read_file(self.files[idx])
         
 
-l = len(folders)
 train_size = 0.9
-cutoff = int(l*train_size)
 
-train_set = FlowerDataset([folder[:cutoff] for folder in folders], data_dir, in_memory=load_in_memory)
-test_set = FlowerDataset([folder[cutoff:] for folder in folders], data_dir, in_memory=load_in_memory)
+train_files = []
+test_files = []
+
+for folder in folders:
+    cutoff = int(train_size*len(folder))
+    train_files.append(folder[:cutoff])
+    test_files.append(folder[cutoff:])
+
+    
+
+train_set = FlowerDataset(train_files, data_dir, in_memory=load_in_memory)
+test_set = FlowerDataset(test_files, data_dir, in_memory=load_in_memory)
 
 class CNNClassifier(nn.Module):
     def __init__(self, num_classes=10):
