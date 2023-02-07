@@ -86,28 +86,28 @@ train_set = FlowerDataset(train_files, data_dir, in_memory=load_in_memory)
 test_set = FlowerDataset(test_files, data_dir, in_memory=load_in_memory)
 
 class CNNClassifier(nn.Module):
-    def __init__(self, num_classes=10):
+    def __init__(self, num_classes=10, padding="valid"):
         super(CNNClassifier, self).__init__()
         
-        self.cnn_layer1 = nn.Sequential(nn.Conv2d(3, 16, kernel_size=3, padding='valid'),
+        self.cnn_layer1 = nn.Sequential(nn.Conv2d(3, 16, kernel_size=3, padding=padding),
                                         nn.ReLU(),
-                                        nn.Dropout(0.1),
+                                        nn.Dropout(0.2),
                                         nn.BatchNorm2d(16),
                                         nn.MaxPool2d(kernel_size=2))
-        self.cnn_layer2 = nn.Sequential(nn.Conv2d(16, 32, kernel_size=3, padding='valid'),
+        self.cnn_layer2 = nn.Sequential(nn.Conv2d(16, 32, kernel_size=3, padding=padding),
                                         nn.ReLU(),
-                                        nn.Dropout(0.15),
+                                        nn.Dropout(0.2),
                                         nn.BatchNorm2d(32),
                                         nn.MaxPool2d(kernel_size=2))
-        self.cnn_layer3 = nn.Sequential(nn.Conv2d(32, 64, kernel_size=3, padding='valid'),
+        self.cnn_layer3 = nn.Sequential(nn.Conv2d(32, 64, kernel_size=3, padding=padding),
                                         nn.ReLU(),
                                         nn.Dropout(0.2),
                                         nn.BatchNorm2d(64))
         
                                         
         self.linear_layer1 = nn.Linear(64, 16)
-        self.dropout1 = nn.Dropout(0.5)
-        self.activ1 = nn.ReLU()
+        self.dropout1 = nn.Dropout(0.4)
+        self.activ1 = nn.Tanh()
         self.linear_layer2 = nn.Linear(16, num_classes)
         
     def forward(self, images):
@@ -196,7 +196,7 @@ model.apply(init_weights)
 
 num_epochs = 20
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD
+optimizer = torch.optim.Adam
 learning_rate = 0.001
 batch_size = 1
 
