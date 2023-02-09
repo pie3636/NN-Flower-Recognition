@@ -108,10 +108,10 @@ class CNNClassifier(nn.Module):
         self.linear_layer1 = nn.Linear(64, 32)
         self.dropout1 = nn.Dropout(0.3)
         self.activ1 = nn.ReLU()
-        self.linear_layer1 = nn.Linear(32, 16)
-        self.dropout1 = nn.Dropout(0.3)
-        self.activ1 = nn.ReLU()
-        self.linear_layer2 = nn.Linear(16, num_classes)
+        self.linear_layer2 = nn.Linear(32, 16)
+        self.dropout2 = nn.Dropout(0.3)
+        self.activ2 = nn.ReLU()
+        self.linear_layer3 = nn.Linear(16, num_classes)
         
     def forward(self, images):
         
@@ -129,9 +129,11 @@ class CNNClassifier(nn.Module):
         # Fully-connected layers
         out = self.linear_layer1(out_vec)
         out = self.activ1(out)
-        out = self.dropout1(out)
+        #out = self.dropout1(out)
         out2 = self.linear_layer2(out)
-        return out2
+        out2 = self.activ2(out2)
+        out3 = self.linear_layer3(out2)
+        return out3
 
 def add_noise(inputs,noise_factor=0.3):
     noisy = inputs+torch.randn_like(inputs) * noise_factor
