@@ -105,9 +105,12 @@ class CNNClassifier(nn.Module):
                                         nn.BatchNorm2d(64))
         
                                         
-        self.linear_layer1 = nn.Linear(64, 16)
-        self.dropout1 = nn.Dropout(0.4)
-        self.activ1 = nn.Tanh()
+        self.linear_layer1 = nn.Linear(64, 32)
+        self.dropout1 = nn.Dropout(0.3)
+        self.activ1 = nn.ReLU()
+        self.linear_layer1 = nn.Linear(32, 16)
+        self.dropout1 = nn.Dropout(0.3)
+        self.activ1 = nn.ReLU()
         self.linear_layer2 = nn.Linear(16, num_classes)
         
     def forward(self, images):
